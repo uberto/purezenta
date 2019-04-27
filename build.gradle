@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.31'
     id "application"
+    id 'org.openjfx.javafxplugin' version '0.0.7'
 }
 
 group 'com.ubertob'
@@ -39,5 +40,9 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
+javafx {
+    version = "12.0.1"
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
 
 
