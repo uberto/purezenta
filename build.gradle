@@ -25,7 +25,9 @@ ext {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    
+    implementation "org.apache.pdfbox:pdfbox:2.0.15"
+
+
     testImplementation "dev.minutest:minutest:1.5.0"
     testImplementation "com.willowtreeapps.assertk:assertk-jvm:0.13"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
@@ -34,15 +36,15 @@ dependencies {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "${jvmVersion}"
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "${jvmVersion}"
 }
 
 javafx {
     version = "12.0.1"
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = [ 'javafx.controls', 'javafx.swing']
 }
 
 
