@@ -7,9 +7,11 @@ MVP Goals:
 * support spotlight effects to be used with Logitech-Spotlight pointer
 
 
-Plan:
+Execution:
 
 Spike: using fullscreen javafx from Kotlin -> done
+
 Spike: reading and rendering pages from a pdf in Kotlin -> done
-Spike: real time animations/effects in kotlin
+
+Spike: real time animations/effects in kotlin -> todo
 
