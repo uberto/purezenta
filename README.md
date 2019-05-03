@@ -13,5 +13,7 @@ Spike: using fullscreen javafx from Kotlin -> done
 
 Spike: reading and rendering pages from a pdf in Kotlin -> done
 
+Spike: make multimonitor rendering working -> done
+
 Spike: real time animations/effects in kotlin -> todo
 
