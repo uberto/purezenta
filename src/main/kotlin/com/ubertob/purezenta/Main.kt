@@ -26,6 +26,8 @@ class Main : Application() {
             primaryStage.title = "Purezenta"
             primaryStage.setMaximized(true)
             primaryStage.setFullScreen(true)
+            //it goes fullscreen on one monitor only
+
 
 
 
@@ -34,7 +36,7 @@ class Main : Application() {
 
             for ( screen in Screen.getScreens() ) {
 
-                println("bounds ${screen.bounds}")
+                println("bounds ${screen.bounds}") //screen give coordinate for each monitor but they are sharing same area
             }
             val iv1 = ImageView()
 
