@@ -6,6 +6,18 @@ MVP Goals:
 * support multi monitors showing info on primary monitor and slide on secondary
 * support spotlight effects to be used with Logitech-Spotlight pointer
 
+Spike on http://almasb.github.io/FXGL/
+
+Future Features:
+Multi monitor support
+Timer
+Slides note (from external file)
+
+modes:
+- spotlight (chose shadow strengh and size)
+- write mode (chose color and pen width)
+- highligh mode (chose color and pen width)
+- zoom (like spotlight+zoom factor)
 
 Execution:
 
