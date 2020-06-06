@@ -9,10 +9,11 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 wrapper {
-    gradleVersion = "5.4.1"
+    gradleVersion = "6.5"
 }
 
 ext {
@@ -26,10 +27,11 @@ ext {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.apache.pdfbox:pdfbox:2.0.15"
+    implementation "com.gluonhq.attach:storage:4.0.7"
+    implementation "com.gluonhq.attach:util:4.0.7"
+    implementation 'com.github.almasb:fxgl:11.9'
 
-
-    testImplementation "dev.minutest:minutest:1.5.0"
-    testImplementation "com.willowtreeapps.assertk:assertk-jvm:0.13"
+    testImplementation "io.strikt:strikt-core:0.26.1"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
