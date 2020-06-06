@@ -7,6 +7,7 @@ import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.ImageView
+import javafx.scene.image.WritableImage
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
@@ -24,6 +25,9 @@ import java.io.File
 class Main : Application() {
 
     var currPage = 0
+
+    val pdfPages = loadPdf(File("examples/4rulesfunctional.pdf"))
+
     override fun start(primaryStage: Stage?) {
         if (primaryStage != null) {
             primaryStage.title = "Purezenta"
@@ -47,86 +51,75 @@ class Main : Application() {
 
             val canvas = Canvas(imageView.fitWidth, imageView.fitHeight)
             val graphicsContext: GraphicsContext = canvas.getGraphicsContext2D()
-            initDraw(graphicsContext)
+            graphicsContext.stroke = Color.RED
+            graphicsContext.lineWidth = 5.0
             canvas.addEventHandler(
-                MouseEvent.MOUSE_PRESSED,
+                MouseEvent.MOUSE_PRESSED)
                 { event ->
                     graphicsContext.beginPath()
                     graphicsContext.moveTo(event.getX(), event.getY())
                     graphicsContext.stroke()
                 }
-            )
-            canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED,
+
+            canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED)
                 { event ->
                     graphicsContext.lineTo(event.getX(), event.getY())
                     graphicsContext.stroke()
                 }
-            )
-            canvas.addEventHandler(MouseEvent.MOUSE_RELEASED,
-                { event ->
-                })
-
 
             val root = StackPane()
+
+
+
             root.children.add(imageView)
             root.children.add(canvas)
+
             with(primaryStage) {
                 scene = Scene(root)
-
-//Registering the event filter
-        //        scene.addEventFilter(MouseEvent.MOUSE_CLICKED, drawLineEvent(root));
-
-                scene.addEventFilter(KeyEvent.KEY_PRESSED, turnPageEvent(imageView))
-
+                scene.addEventFilter(KeyEvent.KEY_PRESSED, turnPageEvent(imageView, graphicsContext))
                 show()
             }
         }
     }
 
 
-    private fun initDraw(gc: GraphicsContext) {
-        val canvasWidth = gc.canvas.width
-        val canvasHeight = gc.canvas.height
-        gc.fill = Color.LIGHTGRAY
-        gc.stroke = Color.BLACK
-        gc.lineWidth = 5.0
-        gc.fill()
-        gc.strokeRect(
-            0.0, 0.0,  //y of the upper left corner
-            canvasWidth,  //width of the rectangle
-            canvasHeight
-        ) //height of the rectangle
-        gc.fill = Color.RED
-        gc.stroke = Color.BLUE
-        gc.lineWidth = 1.0
-    }
-
-    private fun turnPageEvent(imageView: ImageView) = EventHandler<KeyEvent> { ke ->
+    private fun turnPageEvent(imageView: ImageView, graphicsContext: GraphicsContext) = EventHandler<KeyEvent> { ke ->
 
         if (ke.getCode() == KeyCode.RIGHT) {
+            println("right")
             currPage += 1
             showPdfPage(imageView, currPage)
+            graphicsContext.clearRect(0.0,0.0,imageView.fitWidth, imageView.fitHeight)
         } else if (ke.getCode() == KeyCode.LEFT) {
+            println("left")
             currPage -= 1
             showPdfPage(imageView, currPage)
+            graphicsContext.clearRect(0.0,0.0,imageView.fitWidth, imageView.fitHeight)
+        }
+    }
+
+    private fun loadPdf(file: File): List<WritableImage> {
+
+        println("Opening pdf ${file.canonicalFile}")
+        val document = PDDocument.load(file)
+        try {
+            val pdfRenderer = PDFRenderer(document)
+
+            val pages = 0.. document.pages.count-1
+
+           return pages.map {
+               println("Rendering page $it")
+               val bim = pdfRenderer.renderImage(it, 4f)
+                SwingFXUtils.toFXImage(bim, null)
+            }
+        } finally {
+            document.close()
         }
     }
 
     private fun showPdfPage(imageView: ImageView, page: Int) {
 
-        val file = File("examples/4rulesfunctional.pdf")
-
-        val document = PDDocument.load(file)
-        val pdfRenderer = PDFRenderer(document)
-
-
-        val bim = pdfRenderer.renderImage(page)
-
-        val image = SwingFXUtils.toFXImage(bim, null)
-
-        imageView.setImage(image)
-
-        document.close()
+        imageView.setImage(pdfPages[page])
 
     }
 
