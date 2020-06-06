@@ -2,21 +2,19 @@ package com.ubertob.purezenta
 
 import javafx.application.Application
 import javafx.embed.swing.SwingFXUtils
+import javafx.event.EventHandler
 import javafx.scene.Scene
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.scene.input.MouseEvent
+import javafx.scene.layout.Pane
+import javafx.scene.layout.StackPane
+import javafx.scene.paint.Color
+import javafx.scene.shape.Line
 import javafx.stage.Screen
 import javafx.stage.Stage
-import javafx.scene.layout.StackPane
-import javafx.scene.text.Text
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.rendering.ImageType
 import org.apache.pdfbox.rendering.PDFRenderer
-import java.awt.Graphics2D
-import java.awt.Toolkit
-import java.awt.image.BufferedImage
 import java.io.File
-import javax.imageio.ImageIO
 
 
 class Main : Application() {
@@ -29,12 +27,9 @@ class Main : Application() {
             //it goes fullscreen on one monitor only
 
 
-
-
-
             println("Number of screens found ${Screen.getScreens().size}")
 
-            for ( screen in Screen.getScreens() ) {
+            for (screen in Screen.getScreens()) {
 
                 println("bounds ${screen.bounds}") //screen give coordinate for each monitor but they are sharing same area
             }
@@ -50,6 +45,11 @@ class Main : Application() {
             root.children.add(iv1)
             with(primaryStage) {
                 scene = Scene(root)
+
+//Registering the event filter
+                scene.addEventFilter(MouseEvent.MOUSE_CLICKED, drawLineEvent(root));
+
+
                 show()
             }
         }
@@ -79,4 +79,39 @@ class Main : Application() {
 
 fun main(args: Array<String>) {
     Application.launch(Main::class.java, *args)
+}
+
+var last = Point(0, 0)
+fun drawLineEvent(pane: Pane): EventHandler<MouseEvent> =
+    EventHandler { me ->
+        println(me)
+//        if (me == MOUSE_CLICKED) {
+        println("draw line pane ${last.xx}  ${last.yy} ${me.sceneX} ${me.sceneY})")
+
+        val l = Line()
+        pane.children.add(l)
+
+
+        l.startX = last.xx
+        l.endX = me.sceneX
+        l.startY = last.yy
+        l.endY = me.sceneY
+        l.stroke = Color.RED
+        l.strokeWidth = 10.0
+
+        l.translateX = l.startX
+        l.translateY = l.startY
+
+        last = Point(me.x, me.y)
+//        }
+    }
+
+
+data class Point(val x: Int, val y: Int) {
+
+    constructor(ax: Double, ay: Double) : this(ax.toInt(), ay.toInt())
+
+
+    val xx: Double = x.toDouble()
+    val yy: Double = y.toDouble()
 }
