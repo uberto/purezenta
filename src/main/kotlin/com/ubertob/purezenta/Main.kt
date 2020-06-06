@@ -4,7 +4,11 @@ import javafx.application.Application
 import javafx.embed.swing.SwingFXUtils
 import javafx.event.EventHandler
 import javafx.scene.Scene
+import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.ImageView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
 import javafx.scene.layout.StackPane
@@ -19,6 +23,7 @@ import java.io.File
 
 class Main : Application() {
 
+    var currPage = 0
     override fun start(primaryStage: Stage?) {
         if (primaryStage != null) {
             primaryStage.title = "Purezenta"
@@ -33,45 +38,96 @@ class Main : Application() {
 
                 println("bounds ${screen.bounds}") //screen give coordinate for each monitor but they are sharing same area
             }
-            val iv1 = ImageView()
+            val imageView = ImageView()
+            imageView.fitHeight = 1080.0
+            imageView.fitWidth = 1920.0
 
-//            val image = Image("file:examples/marina.jpg")
-//            // simple displays ImageView the image as is
-//            iv1.setImage(image)
+            showPdfPage(imageView, currPage)
 
-            attachImage(iv1)
+
+            val canvas = Canvas(imageView.fitWidth, imageView.fitHeight)
+            val graphicsContext: GraphicsContext = canvas.getGraphicsContext2D()
+            initDraw(graphicsContext)
+            canvas.addEventHandler(
+                MouseEvent.MOUSE_PRESSED,
+                { event ->
+                    graphicsContext.beginPath()
+                    graphicsContext.moveTo(event.getX(), event.getY())
+                    graphicsContext.stroke()
+                }
+            )
+            canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED,
+                { event ->
+                    graphicsContext.lineTo(event.getX(), event.getY())
+                    graphicsContext.stroke()
+                }
+            )
+            canvas.addEventHandler(MouseEvent.MOUSE_RELEASED,
+                { event ->
+                })
+
 
             val root = StackPane()
-            root.children.add(iv1)
+            root.children.add(imageView)
+            root.children.add(canvas)
             with(primaryStage) {
                 scene = Scene(root)
 
 //Registering the event filter
-                scene.addEventFilter(MouseEvent.MOUSE_CLICKED, drawLineEvent(root));
+        //        scene.addEventFilter(MouseEvent.MOUSE_CLICKED, drawLineEvent(root));
 
+                scene.addEventFilter(KeyEvent.KEY_PRESSED, turnPageEvent(imageView))
 
                 show()
             }
         }
     }
 
-    private fun attachImage(imageView: ImageView) {
+
+    private fun initDraw(gc: GraphicsContext) {
+        val canvasWidth = gc.canvas.width
+        val canvasHeight = gc.canvas.height
+        gc.fill = Color.LIGHTGRAY
+        gc.stroke = Color.BLACK
+        gc.lineWidth = 5.0
+        gc.fill()
+        gc.strokeRect(
+            0.0, 0.0,  //y of the upper left corner
+            canvasWidth,  //width of the rectangle
+            canvasHeight
+        ) //height of the rectangle
+        gc.fill = Color.RED
+        gc.stroke = Color.BLUE
+        gc.lineWidth = 1.0
+    }
+
+    private fun turnPageEvent(imageView: ImageView) = EventHandler<KeyEvent> { ke ->
+
+        if (ke.getCode() == KeyCode.RIGHT) {
+            currPage += 1
+            showPdfPage(imageView, currPage)
+        } else if (ke.getCode() == KeyCode.LEFT) {
+            currPage -= 1
+            showPdfPage(imageView, currPage)
+        }
+    }
+
+    private fun showPdfPage(imageView: ImageView, page: Int) {
 
         val file = File("examples/4rulesfunctional.pdf")
 
         val document = PDDocument.load(file)
         val pdfRenderer = PDFRenderer(document)
 
-        val bim = pdfRenderer.renderImage(0, 2f)
+
+        val bim = pdfRenderer.renderImage(page)
 
         val image = SwingFXUtils.toFXImage(bim, null)
 
         imageView.setImage(image)
-        imageView.fitHeight = 1080.0
-        imageView.fitWidth = 1920.0
-
 
         document.close()
+
     }
 
 }
