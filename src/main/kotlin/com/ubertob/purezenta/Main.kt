@@ -11,10 +11,8 @@ import javafx.scene.image.WritableImage
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.Pane
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
-import javafx.scene.shape.Line
 import javafx.stage.Screen
 import javafx.stage.Stage
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -27,6 +25,10 @@ class Main : Application() {
     var currPage = 0
 
     val pdfPages = loadPdf(File("examples/4rulesfunctional.pdf"))
+
+    //    val mode: MarkMode = MarkMode.DrawingLines
+    val mode: MarkMode = MarkMode.SpotLight
+
 
     override fun start(primaryStage: Stage?) {
         if (primaryStage != null) {
@@ -51,21 +53,14 @@ class Main : Application() {
 
             val canvas = Canvas(imageView.fitWidth, imageView.fitHeight)
             val graphicsContext: GraphicsContext = canvas.getGraphicsContext2D()
-            graphicsContext.stroke = Color.RED
-            graphicsContext.lineWidth = 5.0
-            canvas.addEventHandler(
-                MouseEvent.MOUSE_PRESSED)
-                { event ->
-                    graphicsContext.beginPath()
-                    graphicsContext.moveTo(event.getX(), event.getY())
-                    graphicsContext.stroke()
-                }
 
-            canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED)
-                { event ->
-                    graphicsContext.lineTo(event.getX(), event.getY())
-                    graphicsContext.stroke()
-                }
+            when (mode) {
+                MarkMode.DrawingLines -> doLineDrawing(graphicsContext, canvas)
+                MarkMode.SpotLight -> doSpotLight(graphicsContext, canvas)
+
+                else -> TODO()
+            }
+
 
             val root = StackPane()
 
@@ -82,6 +77,62 @@ class Main : Application() {
         }
     }
 
+    enum class MarkMode { DrawingLines, SpotLight, Highlight, Zoom }
+
+    private fun doLineDrawing(graphicsContext: GraphicsContext, canvas: Canvas) {
+        graphicsContext.stroke = Color.RED
+        graphicsContext.lineWidth = 5.0
+        canvas.addEventHandler(
+            MouseEvent.MOUSE_PRESSED
+        )
+        { event ->
+            graphicsContext.beginPath()
+            graphicsContext.moveTo(event.getX(), event.getY())
+            graphicsContext.stroke()
+        }
+
+        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED)
+        { event ->
+            graphicsContext.lineTo(event.getX(), event.getY())
+            graphicsContext.stroke()
+        }
+    }
+
+    private fun doSpotLight(
+        graphicsContext: GraphicsContext,
+        canvas: Canvas
+    ) {
+
+        val spotLightBg = Color(0.0, 0.0, 0.0, 0.8)
+
+        graphicsContext.fill = spotLightBg
+        canvas.addEventHandler(
+            MouseEvent.MOUSE_PRESSED
+        )
+        { event ->
+
+            graphicsContext.clearRect(0.0, 0.0, canvas.width, canvas.height)
+            graphicsContext.fill = spotLightBg
+            graphicsContext.fillRect(0.0, 0.0, canvas.width, canvas.height)
+            graphicsContext.clearRect(event.getX() - 100, event.getY() - 100, 200.0, 200.0)
+
+        }
+
+        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED)
+        { event ->
+
+            graphicsContext.clearRect(0.0, 0.0, canvas.width, canvas.height)
+            graphicsContext.fill = spotLightBg
+            graphicsContext.fillRect(0.0, 0.0, canvas.width, canvas.height)
+            graphicsContext.clearRect(event.getX() - 100, event.getY() - 100, 200.0, 200.0)
+        }
+
+        canvas.addEventHandler(MouseEvent.MOUSE_RELEASED)
+        { event ->
+            graphicsContext.clearRect(0.0, 0.0, canvas.width, canvas.height)
+        }
+    }
+
 
     private fun turnPageEvent(imageView: ImageView, graphicsContext: GraphicsContext) = EventHandler<KeyEvent> { ke ->
 
@@ -89,12 +140,12 @@ class Main : Application() {
             println("right")
             currPage += 1
             showPdfPage(imageView, currPage)
-            graphicsContext.clearRect(0.0,0.0,imageView.fitWidth, imageView.fitHeight)
+            graphicsContext.clearRect(0.0, 0.0, imageView.fitWidth, imageView.fitHeight)
         } else if (ke.getCode() == KeyCode.LEFT) {
             println("left")
             currPage -= 1
             showPdfPage(imageView, currPage)
-            graphicsContext.clearRect(0.0,0.0,imageView.fitWidth, imageView.fitHeight)
+            graphicsContext.clearRect(0.0, 0.0, imageView.fitWidth, imageView.fitHeight)
         }
     }
 
@@ -105,11 +156,11 @@ class Main : Application() {
         try {
             val pdfRenderer = PDFRenderer(document)
 
-            val pages = 0.. document.pages.count-1
+            val pages = 0..document.pages.count - 1
 
-           return pages.map {
-               println("Rendering page $it")
-               val bim = pdfRenderer.renderImage(it, 4f)
+            return pages.map {
+                println("Rendering page $it")
+                val bim = pdfRenderer.renderImage(it, 4f)
                 SwingFXUtils.toFXImage(bim, null)
             }
         } finally {
@@ -128,39 +179,4 @@ class Main : Application() {
 
 fun main(args: Array<String>) {
     Application.launch(Main::class.java, *args)
-}
-
-var last = Point(0, 0)
-fun drawLineEvent(pane: Pane): EventHandler<MouseEvent> =
-    EventHandler { me ->
-        println(me)
-//        if (me == MOUSE_CLICKED) {
-        println("draw line pane ${last.xx}  ${last.yy} ${me.sceneX} ${me.sceneY})")
-
-        val l = Line()
-        pane.children.add(l)
-
-
-        l.startX = last.xx
-        l.endX = me.sceneX
-        l.startY = last.yy
-        l.endY = me.sceneY
-        l.stroke = Color.RED
-        l.strokeWidth = 10.0
-
-        l.translateX = l.startX
-        l.translateY = l.startY
-
-        last = Point(me.x, me.y)
-//        }
-    }
-
-
-data class Point(val x: Int, val y: Int) {
-
-    constructor(ax: Double, ay: Double) : this(ax.toInt(), ay.toInt())
-
-
-    val xx: Double = x.toDouble()
-    val yy: Double = y.toDouble()
 }
