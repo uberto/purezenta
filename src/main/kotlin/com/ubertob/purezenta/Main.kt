@@ -18,7 +18,6 @@ import javafx.stage.Stage
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.rendering.PDFRenderer
 import java.io.File
-import java.lang.IllegalStateException
 
 
 class Main : Application() {
@@ -155,9 +154,11 @@ class Main : Application() {
             }
             KeyCode.L -> mode = MarkMode.DrawingLines
             KeyCode.S -> mode = MarkMode.SpotLight
+            KeyCode.Q -> {
+                System.exit(0)
+            }
             else -> ke.consume()
         }
-
 
 
     }
@@ -180,7 +181,6 @@ class Main : Application() {
             document.close()
         }
     }
-
 
 
 }
