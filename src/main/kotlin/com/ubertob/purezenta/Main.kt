@@ -143,12 +143,12 @@ class Main : Application() {
 
         when (ke.code) {
             KeyCode.RIGHT -> {
-                currPage += 1
+                currPage += if (currPage < pdfPages.size -1) 1 else 0
                 showPdfPage(imageView, currPage)
                 graphicsContext.clearRect(0.0, 0.0, imageView.fitWidth, imageView.fitHeight)
             }
             KeyCode.LEFT -> {
-                currPage -= 1
+                currPage -= if (currPage > 0) 1 else 0
                 showPdfPage(imageView, currPage)
                 graphicsContext.clearRect(0.0, 0.0, imageView.fitWidth, imageView.fitHeight)
             }
@@ -159,7 +159,6 @@ class Main : Application() {
             }
             else -> ke.consume()
         }
-
 
     }
 
